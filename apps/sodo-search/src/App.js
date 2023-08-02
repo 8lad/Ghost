@@ -20,7 +20,7 @@ export default class App extends React.Component {
             indexComplete: false
         };
 
-        this.inputRef = React.createRef();
+        this.inputRef = React.createRef(null);
     }
 
     componentDidMount() {
@@ -96,10 +96,10 @@ export default class App extends React.Component {
             tmpElement.style.position = 'fixed';
             tmpElement.style.top = '0';
             document.body.appendChild(tmpElement);
-            tmpElement.focus();
+            tmpElement?.focus();
 
             setTimeout(() => {
-                this.inputRef.current.focus();
+                this.inputRef?.current?.focus();
                 document.body.removeChild(tmpElement);
             }, 150);
         };

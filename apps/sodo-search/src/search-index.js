@@ -11,6 +11,7 @@ export default class SearchIndex {
         });
 
         this.postsIndex = new Flexsearch.Document({
+            encode: str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
             tokenize: 'forward',
             document: {
                 id: 'id',
