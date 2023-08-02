@@ -155,7 +155,7 @@ export default class App extends React.Component {
                 indexComplete: this.state.indexComplete,
                 searchValue: this.state.searchValue,
                 inputRef: this.inputRef,
-                onAction: () => {},
+                onAction: () => { },
                 dispatch: (action, data) => {
                     if (action === 'update') {
                         this.setState({

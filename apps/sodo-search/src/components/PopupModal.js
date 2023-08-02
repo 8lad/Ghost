@@ -1,9 +1,12 @@
+/* eslint-disable object-curly-spacing */
 import Frame from './Frame';
 import AppContext from '../AppContext';
-import {ReactComponent as SearchIcon} from '../icons/search.svg';
-import {ReactComponent as ClearIcon} from '../icons/clear.svg';
-import {ReactComponent as CircleAnimated} from '../icons/circle-anim.svg';
-import React, {useContext, useEffect, useMemo, useRef, useState} from 'react';
+import { ReactComponent as SearchIcon } from '../icons/search.svg';
+import { ReactComponent as ClearIcon } from '../icons/clear.svg';
+import { ReactComponent as CircleAnimated } from '../icons/circle-anim.svg';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+
+const React = require('react');
 
 const DEFAULT_MAX_POSTS = 10;
 const STEP_MAX_POSTS = 10;
@@ -71,7 +74,8 @@ class PopupContent extends React.Component {
 }
 
 function SearchBox() {
-    const {searchValue, dispatch, inputRef} = useContext(AppContext);
+    const { searchValue, dispatch } = useContext(AppContext);
+    const inputRef = useRef(null);
     const containerRef = useRef(null);
     useEffect(() => {
         setTimeout(() => {
@@ -91,7 +95,7 @@ function SearchBox() {
         return () => {
             containeRefNode?.ownerDocument.removeEventListener('keyup', keyUphandler);
         };
-    }, [dispatch, inputRef]);
+    }, [dispatch]);
 
     let className = 'z-10 relative flex items-center py-5 px-4 sm:px-7 bg-white rounded-t-lg shadow';
     if (!searchValue) {
@@ -126,7 +130,7 @@ function SearchBox() {
 }
 
 function SearchClearIcon() {
-    const {searchValue = '', dispatch} = useContext(AppContext);
+    const { searchValue = '', dispatch } = useContext(AppContext);
     if (!searchValue) {
         return (
             <SearchIcon className='text-neutral-900' alt='Search' />
@@ -144,7 +148,7 @@ function SearchClearIcon() {
 }
 
 function Loading() {
-    const {indexComplete, searchValue} = useContext(AppContext);
+    const { indexComplete, searchValue } = useContext(AppContext);
     if (!indexComplete && searchValue) {
         return (
             <CircleAnimated className='shrink-0' />
@@ -154,7 +158,7 @@ function Loading() {
 }
 
 function CancelButton() {
-    const {dispatch} = useContext(AppContext);
+    const { dispatch } = useContext(AppContext);
 
     return (
         <button
@@ -170,8 +174,8 @@ function CancelButton() {
     );
 }
 
-function TagListItem({tag, selectedResult, setSelectedResult}) {
-    const {name, url, id} = tag;
+function TagListItem({ tag, selectedResult, setSelectedResult }) {
+    const { name, url, id } = tag;
     let className = 'flex items-center py-3 -mx-4 sm:-mx-7 px-4 sm:px-7 cursor-pointer';
     if (id === selectedResult) {
         className += ' bg-neutral-100';
@@ -194,7 +198,7 @@ function TagListItem({tag, selectedResult, setSelectedResult}) {
     );
 }
 
-function TagResults({tags, selectedResult, setSelectedResult}) {
+function TagResults({ tags, selectedResult, setSelectedResult }) {
     if (!tags?.length) {
         return null;
     }
@@ -204,7 +208,7 @@ function TagResults({tags, selectedResult, setSelectedResult}) {
             <TagListItem
                 key={d.name}
                 tag={d}
-                {...{selectedResult, setSelectedResult}}
+                {...{ selectedResult, setSelectedResult }}
             />
         );
     });
@@ -216,9 +220,9 @@ function TagResults({tags, selectedResult, setSelectedResult}) {
     );
 }
 
-function PostListItem({post, selectedResult, setSelectedResult}) {
-    const {searchValue} = useContext(AppContext);
-    const {title, excerpt, url, id} = post;
+function PostListItem({ post, selectedResult, setSelectedResult }) {
+    const { searchValue } = useContext(AppContext);
+    const { title, excerpt, url, id } = post;
     let className = 'py-3 -mx-4 sm:-mx-7 px-4 sm:px-7 cursor-pointer';
     if (id === selectedResult) {
         className += ' bg-neutral-100';
@@ -245,15 +249,21 @@ function PostListItem({post, selectedResult, setSelectedResult}) {
     );
 }
 
-function getMatchIndexes({text, highlight}) {
+function escapeSpecialSymbols(highlightText) {
+    return highlightText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getMatchIndexes({ text, highlight }) {
     let highlightRegexText = '';
-    highlight?.split(' ').forEach((d, idx) => {
+    const formattedHighlight = escapeSpecialSymbols(highlight);
+    formattedHighlight?.split(' ').forEach((d, idx) => {
         if (idx > 0) {
             highlightRegexText += `|^` + d + `|\\s` + d;
         } else {
             highlightRegexText = `^` + d + `|\\s` + d;
         }
     });
+
     const matchRegex = new RegExp(`${highlightRegexText}`, 'ig');
     let matches = text?.matchAll(matchRegex);
     const indexes = [];
@@ -266,8 +276,8 @@ function getMatchIndexes({text, highlight}) {
     return indexes;
 }
 
-function getHighlightParts({text, highlight}) {
-    const highlightIndexes = getMatchIndexes({text, highlight});
+function getHighlightParts({ text, highlight }) {
+    const highlightIndexes = getMatchIndexes({ text, highlight });
     const parts = [];
     let lastIdx = 0;
 
@@ -302,15 +312,15 @@ function getHighlightParts({text, highlight}) {
     };
 }
 
-function HighlightedSection({text = '', highlight = '', isExcerpt}) {
+function HighlightedSection({ text = '', highlight = '', isExcerpt }) {
     text = text || '';
     highlight = highlight || '';
-    let {parts, highlightIndexes} = getHighlightParts({text, highlight});
+    let { parts, highlightIndexes } = getHighlightParts({ text, highlight });
     if (isExcerpt && highlightIndexes?.[0]) {
         const startIdx = highlightIndexes?.[0]?.startIdx;
         if (startIdx > 50) {
             text = '...' + text?.slice(startIdx - 20);
-            const {parts: updatedParts} = getHighlightParts({text, highlight});
+            const { parts: updatedParts } = getHighlightParts({ text, highlight });
             parts = updatedParts;
         }
     }
@@ -319,7 +329,7 @@ function HighlightedSection({text = '', highlight = '', isExcerpt}) {
         if (d?.type === 'highlight') {
             return (
                 <React.Fragment key={idx}>
-                    <HighlightWord word={d.text} isExcerpt={isExcerpt}/>
+                    <HighlightWord word={d.text} isExcerpt={isExcerpt} />
                 </React.Fragment>
             );
         } else {
@@ -337,7 +347,7 @@ function HighlightedSection({text = '', highlight = '', isExcerpt}) {
     );
 }
 
-function HighlightWord({word, isExcerpt}) {
+function HighlightWord({ word, isExcerpt }) {
     if (isExcerpt) {
         return (
             <>
@@ -352,7 +362,7 @@ function HighlightWord({word, isExcerpt}) {
     );
 }
 
-function ShowMoreButton({posts, maxPosts, setMaxPosts}) {
+function ShowMoreButton({ posts, maxPosts, setMaxPosts }) {
     if (!posts?.length || maxPosts >= posts?.length) {
         return null;
     }
@@ -369,7 +379,7 @@ function ShowMoreButton({posts, maxPosts, setMaxPosts}) {
     );
 }
 
-function PostResults({posts, selectedResult, setSelectedResult}) {
+function PostResults({ posts, selectedResult, setSelectedResult }) {
     const [maxPosts, setMaxPosts] = useState(DEFAULT_MAX_POSTS);
     useEffect(() => {
         setMaxPosts(DEFAULT_MAX_POSTS);
@@ -384,7 +394,7 @@ function PostResults({posts, selectedResult, setSelectedResult}) {
             <PostListItem
                 key={d.title}
                 post={d}
-                {...{selectedResult, setSelectedResult}}
+                {...{ selectedResult, setSelectedResult }}
             />
         );
     });
@@ -397,8 +407,8 @@ function PostResults({posts, selectedResult, setSelectedResult}) {
     );
 }
 
-function AuthorListItem({author, selectedResult, setSelectedResult}) {
-    const {name, profile_image: profileImage, url, id} = author;
+function AuthorListItem({ author, selectedResult, setSelectedResult }) {
+    const { name, profile_image: profileImage, url, id } = author;
     let className = 'py-[1rem] -mx-4 sm:-mx-7 px-4 sm:px-7 cursor-pointer flex items-center';
     if (id === selectedResult) {
         className += ' bg-neutral-100';
@@ -421,12 +431,12 @@ function AuthorListItem({author, selectedResult, setSelectedResult}) {
     );
 }
 
-function AuthorAvatar({name, avatar}) {
+function AuthorAvatar({ name, avatar }) {
     const Avatar = avatar?.length;
     const Character = name.charAt(0);
     if (Avatar) {
         return (
-            <img className='rounded-full bg-neutral-300 w-7 h-7 mr-2 object-cover' src={avatar} alt={name}/>
+            <img className='rounded-full bg-neutral-300 w-7 h-7 mr-2 object-cover' src={avatar} alt={name} />
         );
     }
     return (
@@ -434,7 +444,7 @@ function AuthorAvatar({name, avatar}) {
     );
 }
 
-function AuthorResults({authors, selectedResult, setSelectedResult}) {
+function AuthorResults({ authors, selectedResult, setSelectedResult }) {
     if (!authors?.length) {
         return null;
     }
@@ -444,7 +454,7 @@ function AuthorResults({authors, selectedResult, setSelectedResult}) {
             <AuthorListItem
                 key={d.name}
                 author={d}
-                {...{selectedResult, setSelectedResult}}
+                {...{ selectedResult, setSelectedResult }}
             />
         );
     });
@@ -458,7 +468,7 @@ function AuthorResults({authors, selectedResult, setSelectedResult}) {
 }
 
 function SearchResultBox() {
-    const {searchValue = '', searchIndex, indexComplete} = useContext(AppContext);
+    const { searchValue = '', searchIndex, indexComplete } = useContext(AppContext);
     let searchResults = null;
     let filteredTags = [];
     let filteredPosts = [];
@@ -496,8 +506,8 @@ function SearchResultBox() {
     return null;
 }
 
-function Results({posts, authors, tags}) {
-    const {searchValue} = useContext(AppContext);
+function Results({ posts, authors, tags }) {
+    const { searchValue } = useContext(AppContext);
 
     const allResults = useMemo(() => {
         return [
@@ -578,7 +588,7 @@ function NoResultsBox() {
 }
 
 function Search() {
-    const {dispatch} = useContext(AppContext);
+    const { dispatch } = useContext(AppContext);
     return (
         <>
             <div
@@ -612,7 +622,7 @@ export default class PopupModal extends React.Component {
     }
 
     onHeightChange(height) {
-        this.setState({height});
+        this.setState({ height });
     }
 
     handlePopupClose(e) {
@@ -640,14 +650,14 @@ export default class PopupModal extends React.Component {
             return (
                 <>
                     <link rel='stylesheet' href={stylesUrl} />
-                    <style dangerouslySetInnerHTML={{__html: styles}} />
+                    <style dangerouslySetInnerHTML={{ __html: styles }} />
                     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1' />
                 </>
             );
         }
         return (
             <>
-                <style dangerouslySetInnerHTML={{__html: styles}} />
+                <style dangerouslySetInnerHTML={{ __html: styles }} />
                 <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1' />
             </>
         );
@@ -664,7 +674,7 @@ export default class PopupModal extends React.Component {
             <div style={Styles.modalContainer} className='gh-root-frame'>
                 <Frame style={frameStyle} title='portal-popup' head={this.renderFrameStyles()}>
                     <div
-                        onClick = {e => this.handlePopupClose(e)}
+                        onClick={e => this.handlePopupClose(e)}
                         className='absolute top-0 bottom-0 left-0 right-0 block backdrop-blur-[2px] animate-fadein z-0 bg-gradient-to-br from-[rgba(0,0,0,0.2)] to-[rgba(0,0,0,0.1)]' />
                     <PopupContent />
                 </Frame>
@@ -673,7 +683,7 @@ export default class PopupModal extends React.Component {
     }
 
     render() {
-        const {showPopup} = this.context;
+        const { showPopup } = this.context;
         if (showPopup) {
             return this.renderFrameContainer();
         }

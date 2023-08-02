@@ -1,8 +1,9 @@
+/* eslint-disable object-curly-spacing */
 import Flexsearch from 'flexsearch';
 import GhostContentAPI from '@tryghost/content-api';
 
 export default class SearchIndex {
-    constructor({adminUrl, apiKey}) {
+    constructor({ adminUrl, apiKey }) {
         this.api = new GhostContentAPI({
             url: adminUrl,
             key: apiKey,
